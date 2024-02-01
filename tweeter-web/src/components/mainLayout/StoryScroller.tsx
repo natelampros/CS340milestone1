@@ -1,34 +1,25 @@
-import { AuthToken, User } from "tweeter-shared";
+import { AuthToken, FakeData, Status, User } from "tweeter-shared";
 import { useState, useRef, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import UserItem from "../userItem/UserItem";
+
 import useToastListener from "../toaster/ToastListenerHook";
+import StatusItem from "../statusItem/StatusItem";
 import useUserNavigation from "../userInfo/UserNavigationHook";
 
 export const PAGE_SIZE = 10;
 
-interface Props {
-  loadItems: (
-    authToken: AuthToken,
-    user: User,
-    pageSize: number,
-    lastItem: User | null
-  ) => Promise<[User[], boolean]>;
-  itemDescription: string;
-}
-
-const UserItemScroller = (props: Props) => {
+const StoryScroller = () => {
   const { displayErrorMessage } = useToastListener();
-  const [items, setItems] = useState<User[]>([]);
+  const [items, setItems] = useState<Status[]>([]);
   const [hasMoreItems, setHasMoreItems] = useState(true);
-  const [lastItem, setLastItem] = useState<User | null>(null);
+  const [lastItem, setLastItem] = useState<Status | null>(null);
 
   // Required to allow the addItems method to see the current value of 'items'
   // instead of the value from when the closure was created.
   const itemsReference = useRef(items);
   itemsReference.current = items;
 
-  const addItems = (newItems: User[]) =>
+  const addItems = (newItems: Status[]) =>
     setItems([...itemsReference.current, ...newItems]);
 
   const { displayedUser, authToken } = useUserNavigation();
@@ -42,7 +33,7 @@ const UserItemScroller = (props: Props) => {
   const loadMoreItems = async () => {
     try {
       if (hasMoreItems) {
-        let [newItems, hasMore] = await props.loadItems(
+        let [newItems, hasMore] = await loadMoreStoryItems(
           authToken!,
           displayedUser!,
           PAGE_SIZE,
@@ -55,9 +46,19 @@ const UserItemScroller = (props: Props) => {
       }
     } catch (error) {
       displayErrorMessage(
-        `Failed to load ${props.itemDescription} because of exception: ${error}`
+        `Failed to load story items because of exception: ${error}`
       );
     }
+  };
+
+  const loadMoreStoryItems = async (
+    authToken: AuthToken,
+    user: User,
+    pageSize: number,
+    lastItem: Status | null
+  ): Promise<[Status[], boolean]> => {
+    // TODO: Replace with the result of calling server
+    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
   };
 
   return (
@@ -74,7 +75,7 @@ const UserItemScroller = (props: Props) => {
             key={index}
             className="row mb-3 mx-0 px-0 border rounded bg-white"
           >
-            <UserItem value={item} />
+            <StatusItem status={item} />
           </div>
         ))}
       </InfiniteScroll>
@@ -82,4 +83,4 @@ const UserItemScroller = (props: Props) => {
   );
 };
 
-export default UserItemScroller;
+export default StoryScroller;
