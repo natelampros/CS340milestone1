@@ -3,6 +3,10 @@ import { useState } from "react";
 import { AuthToken, Status } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "../userInfo/UserInfoHook";
+import {
+  PostStatusPresenter,
+  PostStatusView,
+} from "../../presenter/PostStatusPresenter";
 
 const PostStatus = () => {
   const { displayErrorMessage, displayInfoMessage, clearLastInfoMessage } =
@@ -11,39 +15,33 @@ const PostStatus = () => {
   const { currentUser, authToken } = useUserInfo();
   const [post, setPost] = useState("");
 
+  const listener: PostStatusView = {
+    displayInfoMessage: displayInfoMessage,
+    clearLastInfoMessage: clearLastInfoMessage,
+    setPost: setPost,
+    displayErrorMessage: displayErrorMessage,
+  };
+
+  const presenter = new PostStatusPresenter(listener);
+
   const submitPost = async (event: React.MouseEvent) => {
     event.preventDefault();
-
-    try {
-      displayInfoMessage("Posting status...", 0);
-
-      let status = new Status(post, currentUser!, Date.now());
-
-      await postStatus(authToken!, status);
-
-      clearLastInfoMessage();
-      setPost("");
-      displayInfoMessage("Status posted!", 2000);
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to post the status because of exception: ${error}`
-      );
-    }
+    presenter.submitPost(post, currentUser!, authToken!);
   };
 
-  const postStatus = async (
-    authToken: AuthToken,
-    newStatus: Status
-  ): Promise<void> => {
-    // Pause so we can see the logging out message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
+  // const postStatus = async (
+  //   authToken: AuthToken,
+  //   newStatus: Status
+  // ): Promise<void> => {
+  //   // Pause so we can see the logging out message. Remove when connected to the server
+  //   await new Promise((f) => setTimeout(f, 2000));
 
-    // TODO: Call the server to post the status
-  };
+  //   // TODO: Call the server to post the status
+  // };
 
   const clearPost = (event: React.MouseEvent) => {
     event.preventDefault();
-    setPost("");
+    presenter.clearPost();
   };
 
   const checkButtonStatus: () => boolean = () => {
