@@ -2,13 +2,13 @@ import "./PostStatus.css";
 import { useState } from "react";
 import { AuthToken, Status } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
-import useUserNavigation from "../userInfo/UserNavigationHook";
+import useUserInfo from "../userInfo/UserInfoHook";
 
 const PostStatus = () => {
   const { displayErrorMessage, displayInfoMessage, clearLastInfoMessage } =
     useToastListener();
 
-  const { currentUser, authToken } = useUserNavigation();
+  const { currentUser, authToken } = useUserInfo();
   const [post, setPost] = useState("");
 
   const submitPost = async (event: React.MouseEvent) => {

@@ -4,7 +4,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 import useToastListener from "../toaster/ToastListenerHook";
 import StatusItem from "../statusItem/StatusItem";
-import useUserNavigation from "../userInfo/UserNavigationHook";
+import useUserInfo from "../userInfo/UserInfoHook";
 
 export const PAGE_SIZE = 10;
 
@@ -22,7 +22,7 @@ const StoryScroller = () => {
   const addItems = (newItems: Status[]) =>
     setItems([...itemsReference.current, ...newItems]);
 
-  const { displayedUser, authToken } = useUserNavigation();
+  const { displayedUser, authToken } = useUserInfo();
 
   // Load initial items
   useEffect(() => {
