@@ -3,12 +3,12 @@ import "bootstrap/dist/css/bootstrap.css";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-import { AuthToken, FakeData, User } from "tweeter-shared";
+import { AuthToken, User } from "tweeter-shared";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/UserInfoHook";
 import { UserService } from "../../../model/service/UserService";
-import { LoginPresenter } from "../../../presenter/LoginPresenter";
+import { LoginPresenter, LoginView } from "../../../presenter/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
@@ -27,7 +27,7 @@ const Login = (props: Props) => {
     return !alias || !password;
   };
 
-  const loginView = {
+  const listener: LoginView = {
     displayErrorMessage: (message: string) => displayErrorMessage(message),
     navigateTo: (path: string) => navigate(path),
     updateUserInfo: (user: User, authToken: AuthToken, rememberMe: boolean) =>
@@ -35,7 +35,7 @@ const Login = (props: Props) => {
   };
 
   const userService = new UserService();
-  const loginPresenter = new LoginPresenter(loginView, userService);
+  const loginPresenter = new LoginPresenter(listener);
 
   const doLogin = async () => {
     loginPresenter.doLogin(alias, password, rememberMe, props.originalUrl);

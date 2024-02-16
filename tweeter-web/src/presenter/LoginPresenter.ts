@@ -15,12 +15,12 @@ export class LoginPresenter {
   private view: LoginView;
   private userService: UserService;
 
-  constructor(view: LoginView, userService: UserService) {
+  constructor(view: LoginView) {
     this.view = view;
-    this.userService = userService;
+    this.userService = new UserService();
   }
 
-  async doLogin(
+  public async doLogin(
     alias: string,
     password: string,
     rememberMe: boolean,
