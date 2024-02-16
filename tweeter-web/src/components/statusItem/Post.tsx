@@ -1,4 +1,4 @@
-import { AuthToken, FakeData, Status, User, Type } from "tweeter-shared";
+import { Status, User, Type } from "tweeter-shared";
 import { Link } from "react-router-dom";
 
 import useUserNavigation from "../userInfo/UserNavigationHook";
