@@ -2,15 +2,13 @@ import { AuthToken, FakeData, User } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "./UserInfoHook";
 
-
-
 const useUserNavigation = () => {
   const { currentUser, authToken, setDisplayedUser } = useUserInfo();
 
   const { displayErrorMessage } = useToastListener();
 
   const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
-    event.preventDefault();
+    event.preventDefault(); // dont move out of hook
 
     try {
       let alias = extractAlias(event.target.toString());

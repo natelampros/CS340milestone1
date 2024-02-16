@@ -7,6 +7,8 @@ import { AuthToken, FakeData, User } from "tweeter-shared";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/UserInfoHook";
+import { UserService } from "../../../model/service/UserService";
+import { LoginPresenter } from "../../../presenter/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
@@ -21,43 +23,22 @@ const Login = (props: Props) => {
   const { updateUserInfo } = useUserInfo();
   const { displayErrorMessage } = useToastListener();
 
-  const rememberMeRef = useRef(rememberMe);
-  rememberMeRef.current = rememberMe;
-
   const checkSubmitButtonStatus = (): boolean => {
     return !alias || !password;
   };
 
-  const doLogin = async () => {
-    try {
-      let [user, authToken] = await login(alias, password);
-
-      updateUserInfo(user, user, authToken, rememberMeRef.current);
-
-      if (!!props.originalUrl) {
-        navigate(props.originalUrl);
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to log user in because of exception: ${error}`
-      );
-    }
+  const loginView = {
+    displayErrorMessage: (message: string) => displayErrorMessage(message),
+    navigateTo: (path: string) => navigate(path),
+    updateUserInfo: (user: User, authToken: AuthToken, rememberMe: boolean) =>
+      updateUserInfo(user, user, authToken, rememberMe),
   };
 
-  const login = async (
-    alias: string,
-    password: string
-  ): Promise<[User, AuthToken]> => {
-    // TODO: Replace with the result of calling the server
-    let user = FakeData.instance.firstUser;
+  const userService = new UserService();
+  const loginPresenter = new LoginPresenter(loginView, userService);
 
-    if (user === null) {
-      throw new Error("Invalid alias or password");
-    }
-
-    return [user, FakeData.instance.authToken];
+  const doLogin = async () => {
+    loginPresenter.doLogin(alias, password, rememberMe, props.originalUrl);
   };
 
   const inputFieldGenerator = () => {
