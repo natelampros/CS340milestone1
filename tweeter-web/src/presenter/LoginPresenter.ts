@@ -1,23 +1,20 @@
-import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model/service/UserService";
+import {
+  AuthenticationPresenter,
+  AuthenticationView,
+} from "./AuthenticationPresenter";
 
-export interface LoginView {
-  displayErrorMessage: (message: string) => void;
-  navigateTo: (path: string) => void;
-  updateUserInfo: (
-    user: User,
-    authToken: AuthToken,
-    rememberMe: boolean
-  ) => void;
-}
+export class LoginPresenter extends AuthenticationPresenter<UserService> {
+  protected createService(): UserService {
+    return new UserService();
+  }
 
-export class LoginPresenter {
-  private view: LoginView;
-  private userService: UserService;
+  constructor(view: AuthenticationView) {
+    super(view);
+  }
 
-  constructor(view: LoginView) {
-    this.view = view;
-    this.userService = new UserService();
+  protected get view(): AuthenticationView {
+    return super.view as AuthenticationView;
   }
 
   public async doLogin(
@@ -26,16 +23,16 @@ export class LoginPresenter {
     rememberMe: boolean,
     originalUrl?: string
   ) {
-    try {
-      let [user, authToken] = await this.userService.login(alias, password);
-      this.view.updateUserInfo(user, authToken, rememberMe);
+    this.doFailureReportingOperation(async () => {
+      let [user, authToken] = await this.service.login(alias, password);
+      let url: string;
+      if (!!originalUrl) {
+        url = originalUrl;
+      } else {
+        url = "/";
+      }
 
-      // Navigate based on your logic, could also be part of the view method
-      this.view.navigateTo(originalUrl ? originalUrl : "/");
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to log user in because of exception: ${error}`
-      );
-    }
+      this.updateUserInfoAndNavigate(user, user, authToken, rememberMe, url);
+    }, "log user in");
   }
 }

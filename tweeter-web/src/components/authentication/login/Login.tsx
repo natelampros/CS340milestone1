@@ -8,7 +8,8 @@ import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/UserInfoHook";
 import { UserService } from "../../../model/service/UserService";
-import { LoginPresenter, LoginView } from "../../../presenter/LoginPresenter";
+import { LoginPresenter } from "../../../presenter/LoginPresenter";
+import { AuthenticationView } from "../../../presenter/AuthenticationPresenter";
 
 interface Props {
   originalUrl?: string;
@@ -27,11 +28,10 @@ const Login = (props: Props) => {
     return !alias || !password;
   };
 
-  const listener: LoginView = {
-    displayErrorMessage: (message: string) => displayErrorMessage(message),
+  const listener: AuthenticationView = {
+    updateUserInfo: updateUserInfo,
+    displayErrorMessage: displayErrorMessage,
     navigateTo: (path: string) => navigate(path),
-    updateUserInfo: (user: User, authToken: AuthToken, rememberMe: boolean) =>
-      updateUserInfo(user, user, authToken, rememberMe),
   };
 
   const userService = new UserService();

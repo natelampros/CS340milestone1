@@ -2,29 +2,26 @@ import { UserService } from "../model/service/UserService";
 import { Buffer } from "buffer";
 import { To, NavigateOptions } from "react-router-dom";
 import { User, AuthToken } from "tweeter-shared";
+import {
+  AuthenticationPresenter,
+  AuthenticationView,
+} from "./AuthenticationPresenter";
 
-export interface RegisterView {
+export interface RegisterView extends AuthenticationView {
   setImageUrl: (value: string) => void;
   setImageBytes: (value: Uint8Array) => void;
-  navigate: (to: To, options?: NavigateOptions | undefined) => void;
-  updateUserInfo: (
-    currentUser: User,
-    displayedUser: User | null,
-    authToken: AuthToken,
-    remember: boolean
-  ) => void;
-  displayErrorMessage: (
-    message: string,
-    bootstrapClasses?: string | undefined
-  ) => void;
 }
-export class RegisterPresenter {
-  private view: RegisterView;
-  private service: UserService;
+export class RegisterPresenter extends AuthenticationPresenter<UserService> {
+  protected createService(): UserService {
+    return new UserService();
+  }
 
   constructor(view: RegisterView) {
-    this.view = view;
-    this.service = new UserService();
+    super(view);
+  }
+
+  protected get view(): RegisterView {
+    return super.view as RegisterView;
   }
 
   public handleImageFile = (file: File | undefined) => {
@@ -61,7 +58,7 @@ export class RegisterPresenter {
     imageBytes: Uint8Array,
     rememberMe: boolean
   ) {
-    try {
+    this.doFailureReportingOperation(async () => {
       let [user, authToken] = await this.service.register(
         firstName,
         lastName,
@@ -69,13 +66,7 @@ export class RegisterPresenter {
         password,
         imageBytes
       );
-
-      this.view.updateUserInfo(user, user, authToken, rememberMe);
-      this.view.navigate("/");
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to register user because of exception: ${error}`
-      );
-    }
+      this.updateUserInfoAndNavigate(user, user, authToken, rememberMe, "/");
+    }, "register user");
   }
 }

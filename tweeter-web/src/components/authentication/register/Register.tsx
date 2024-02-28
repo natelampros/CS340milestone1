@@ -35,7 +35,7 @@ const Register = () => {
   const listener: RegisterView = {
     setImageUrl: setImageUrl,
     setImageBytes: setImageBytes,
-    navigate: navigate,
+    navigateTo: navigate,
     updateUserInfo: updateUserInfo,
     displayErrorMessage: displayErrorMessage,
   };
