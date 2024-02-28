@@ -3,16 +3,15 @@ import "bootstrap/dist/css/bootstrap.css";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-import { AuthToken, User } from "tweeter-shared";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/UserInfoHook";
-import { UserService } from "../../../model/service/UserService";
 import { LoginPresenter } from "../../../presenter/LoginPresenter";
 import { AuthenticationView } from "../../../presenter/AuthenticationPresenter";
 
 interface Props {
   originalUrl?: string;
+  presenterGenerator: (view: AuthenticationView) => LoginPresenter;
 }
 
 const Login = (props: Props) => {
@@ -24,32 +23,45 @@ const Login = (props: Props) => {
   const { updateUserInfo } = useUserInfo();
   const { displayErrorMessage } = useToastListener();
 
-  const checkSubmitButtonStatus = (): boolean => {
-    return !alias || !password;
-  };
+  const rememberMeRef = useRef(rememberMe);
+  rememberMeRef.current = rememberMe;
 
   const listener: AuthenticationView = {
     updateUserInfo: updateUserInfo,
     displayErrorMessage: displayErrorMessage,
-    navigateTo: (path: string) => navigate(path),
+    navigateTo: (url: string) => navigate(url),
   };
 
-  const userService = new UserService();
-  const loginPresenter = new LoginPresenter(listener);
+  const [presenter] = useState(props.presenterGenerator(listener));
 
   const doLogin = async () => {
-    loginPresenter.doLogin(alias, password, rememberMe, props.originalUrl);
+    presenter.doLogin(
+      //props.originalUrl,
+      alias,
+      password,
+      rememberMeRef.current
+    );
+  };
+
+  const checkSubmitButtonStatus = (): boolean => {
+    return !alias || !password;
+  };
+
+  const onAliasEvent = (s: string) => {
+    setAlias(s);
+  };
+
+  const onPasswordEvent = (s: string) => {
+    setPassword(s);
   };
 
   const inputFieldGenerator = () => {
     return (
-      <>
-        <AuthenticationFields
-          setAlias={setAlias}
-          setPassword={setPassword}
-          includeMargin={true}
-        />
-      </>
+      <AuthenticationFields
+        setAlias={onAliasEvent}
+        setPassword={onPasswordEvent}
+        includeMargin={true}
+      />
     );
   };
 

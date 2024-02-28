@@ -10,15 +10,18 @@ import Login from "./components/authentication/login/Login";
 import Register from "./components/authentication/register/Register";
 import MainLayout from "./components/mainLayout/MainLayout";
 import Toaster from "./components/toaster/Toaster";
-import UserItemScroller from "./components/mainLayout/UserItemScroller";
-import StatusItemScroller from "./components/mainLayout/StatusItemScroller";
 import useUserInfo from "./components/userInfo/UserInfoHook";
 import { FollowingPresenter } from "./presenter/FollowingPresenter";
 import { UserItemView } from "./presenter/UserItemPresenter";
-import { FollowersPresenter } from "./presenter/FollowersPresenter";
-import { FeedPresenter } from "./presenter/FeedPresenter";
 import { StatusItemView } from "./presenter/StatusItemPresenter";
-import { StoryPresenter } from "./presenter/StoryPresenter";
+import { FeedPresenter } from "./presenter/FeedPresenter";
+import { LoginPresenter } from "./presenter/LoginPresenter";
+import { RegisterPresenter, RegisterView } from "./presenter/RegisterPresenter";
+import { AuthenticationView } from "./presenter/AuthenticationPresenter";
+import ItemScroller from "./components/mainLayout/ItemScroller";
+import { Status, User } from "tweeter-shared";
+import StatusItem from "./components/statusItem/StatusItem";
+import UserItem from "./components/userItem/UserItem";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -49,40 +52,56 @@ const AuthenticatedRoutes = () => {
         <Route
           path="feed"
           element={
-            <StatusItemScroller
+            <ItemScroller
+              key={"feed"}
               presenterGenerator={(view: StatusItemView) =>
                 new FeedPresenter(view)
               }
+              itemComponentGenerator={function (item: Status): JSX.Element {
+                return <StatusItem value={item} />;
+              }}
             />
           }
         />
         <Route
           path="story"
           element={
-            <StatusItemScroller
+            <ItemScroller
+              key={"story"}
               presenterGenerator={(view: StatusItemView) =>
-                new StoryPresenter(view)
+                new FeedPresenter(view)
               }
+              itemComponentGenerator={function (item: Status): JSX.Element {
+                return <StatusItem value={item} />;
+              }}
             />
           }
         />
         <Route
           path="following"
           element={
-            <UserItemScroller
+            <ItemScroller
+              key={"following"}
               presenterGenerator={(view: UserItemView) =>
                 new FollowingPresenter(view)
               }
+              itemComponentGenerator={function (item: User): JSX.Element {
+                return <UserItem value={item} />;
+              }}
             />
           }
         />
         <Route
           path="followers"
           element={
-            <UserItemScroller
+            <ItemScroller
+              key={"followers"}
               presenterGenerator={(view: UserItemView) =>
-                new FollowersPresenter(view)
+                new FollowingPresenter(view)
               }
+              itemComponentGenerator={function (item: User): JSX.Element {
+                return <UserItem value={item} />;
+              }}
             />
           }
         />
@@ -98,9 +117,37 @@ const UnauthenticatedRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="*" element={<Login originalUrl={location.pathname} />} />
+      <Route
+        path="/login"
+        element={
+          <Login
+            presenterGenerator={(view: AuthenticationView) =>
+              new LoginPresenter(view)
+            }
+          />
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <Register
+            presenterGenerator={(view: RegisterView) =>
+              new RegisterPresenter(view)
+            }
+          />
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <Login
+            originalUrl={location.pathname}
+            presenterGenerator={(view: AuthenticationView) =>
+              new LoginPresenter(view)
+            }
+          />
+        }
+      />
     </Routes>
   );
 };

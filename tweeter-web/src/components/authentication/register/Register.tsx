@@ -3,7 +3,6 @@ import "bootstrap/dist/css/bootstrap.css";
 import { ChangeEvent, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/UserInfoHook";
@@ -12,7 +11,11 @@ import {
   RegisterView,
 } from "../../../presenter/RegisterPresenter";
 
-const Register = () => {
+interface Props {
+  presenterGenerator: (view: RegisterView) => RegisterPresenter;
+}
+
+const Register = (props: Props) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [alias, setAlias] = useState("");
@@ -28,19 +31,19 @@ const Register = () => {
   const { updateUserInfo } = useUserInfo();
   const { displayErrorMessage } = useToastListener();
 
+  const listener: RegisterView = {
+    updateUserInfo: updateUserInfo,
+    displayErrorMessage: displayErrorMessage,
+    navigateTo: (url: string) => navigate(url),
+    setImageUrl: (url: string) => setImageUrl(url),
+    setImageBytes: (image: Uint8Array) => setImageBytes(image),
+  };
+
+  const [presenter] = useState(props.presenterGenerator(listener));
+
   const checkSubmitButtonStatus = (): boolean => {
     return !firstName || !lastName || !alias || !password || !imageUrl;
   };
-
-  const listener: RegisterView = {
-    setImageUrl: setImageUrl,
-    setImageBytes: setImageBytes,
-    navigateTo: navigate,
-    updateUserInfo: updateUserInfo,
-    displayErrorMessage: displayErrorMessage,
-  };
-
-  const presenter = new RegisterPresenter(listener);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -57,6 +60,15 @@ const Register = () => {
       rememberMeRef.current
     );
   };
+
+  const onAliasEvent = (s: string) => {
+    setAlias(s);
+  };
+
+  const onPasswordEvent = (s: string) => {
+    setPassword(s);
+  };
+
   const inputFieldGenerator = () => {
     return (
       <>
@@ -82,7 +94,11 @@ const Register = () => {
           />
           <label htmlFor="lastNameInput">Last Name</label>
         </div>
-        <AuthenticationFields setAlias={setAlias} setPassword={setPassword} />
+        <AuthenticationFields
+          setAlias={onAliasEvent}
+          setPassword={onPasswordEvent}
+          includeMargin={false}
+        />
         <div className="form-floating mb-3">
           <input
             type="file"
