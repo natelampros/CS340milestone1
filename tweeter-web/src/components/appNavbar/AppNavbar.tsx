@@ -15,11 +15,16 @@ const AppNavbar = () => {
   const { displayInfoMessage, displayErrorMessage, clearLastInfoMessage } =
     useToastListener();
 
+  let pathname: string = location.pathname;
+
   const listener: AppNavbarView = {
     displayInfoMessage: displayInfoMessage,
     clearUserInfo: clearUserInfo,
     clearLastInfoMessage: clearLastInfoMessage,
     displayErrorMessage: displayErrorMessage,
+    navigateToLogin: () => {
+      pathname = location.pathname;
+    },
   };
 
   const presenter = new AppNavbarPresenter(listener);

@@ -9,7 +9,7 @@ export class LoginPresenter extends AuthenticationPresenter<UserService> {
     return new UserService();
   }
 
-  constructor(view: AuthenticationView) {
+  public constructor(view: AuthenticationView) {
     super(view);
   }
 
@@ -18,10 +18,10 @@ export class LoginPresenter extends AuthenticationPresenter<UserService> {
   }
 
   public async doLogin(
+    originalUrl: string | undefined,
     alias: string,
     password: string,
-    rememberMe: boolean,
-    originalUrl?: string
+    rememberMeRefVal: boolean
   ) {
     this.doFailureReportingOperation(async () => {
       let [user, authToken] = await this.service.login(alias, password);
@@ -32,7 +32,13 @@ export class LoginPresenter extends AuthenticationPresenter<UserService> {
         url = "/";
       }
 
-      this.updateUserInfoAndNavigate(user, user, authToken, rememberMe, url);
-    }, "log user in");
+      this.updateUserInfoAndNavigate(
+        user,
+        user,
+        authToken,
+        rememberMeRefVal,
+        url
+      );
+    }, "login user");
   }
 }

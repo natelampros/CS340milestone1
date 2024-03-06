@@ -6,15 +6,19 @@ export interface PostStatusView extends MessageView {
   setPost(post: string): void;
 }
 export class PostStatusPresenter extends Presenter {
-  private service: StatusService;
+  private _service: StatusService;
 
-  constructor(view: PostStatusView) {
+  public constructor(view: PostStatusView) {
     super(view);
-    this.service = new StatusService();
+    this._service = new StatusService();
   }
 
-  protected get view(): PostStatusView {
+  protected get view() {
     return super.view as PostStatusView;
+  }
+
+  public get service() {
+    return this._service;
   }
 
   public async submitPost(
@@ -33,9 +37,5 @@ export class PostStatusPresenter extends Presenter {
       this.view.setPost("");
       this.view.displayInfoMessage("Status posted!", 2000);
     }, "post the status");
-  }
-
-  public clearPost() {
-    this.view.setPost("");
   }
 }

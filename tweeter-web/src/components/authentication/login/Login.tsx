@@ -12,6 +12,7 @@ import { AuthenticationView } from "../../../presenter/AuthenticationPresenter";
 interface Props {
   originalUrl?: string;
   presenterGenerator: (view: AuthenticationView) => LoginPresenter;
+  presenter?: LoginPresenter;
 }
 
 const Login = (props: Props) => {
@@ -32,11 +33,13 @@ const Login = (props: Props) => {
     navigateTo: (url: string) => navigate(url),
   };
 
-  const [presenter] = useState(props.presenterGenerator(listener));
+  const [presenter] = useState(
+    props.presenter ?? props.presenterGenerator(listener)
+  );
 
   const doLogin = async () => {
     presenter.doLogin(
-      //props.originalUrl,
+      props.originalUrl,
       alias,
       password,
       rememberMeRef.current
@@ -60,7 +63,6 @@ const Login = (props: Props) => {
       <AuthenticationFields
         setAlias={onAliasEvent}
         setPassword={onPasswordEvent}
-        includeMargin={true}
       />
     );
   };

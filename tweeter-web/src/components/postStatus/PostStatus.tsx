@@ -8,7 +8,12 @@ import {
   PostStatusView,
 } from "../../presenter/PostStatusPresenter";
 
-const PostStatus = () => {
+interface Props {
+  presenterGenerator: (view: PostStatusView) => PostStatusPresenter;
+  presenter?: PostStatusPresenter;
+}
+
+const PostStatus = (props: Props) => {
   const { displayErrorMessage, displayInfoMessage, clearLastInfoMessage } =
     useToastListener();
 
@@ -18,30 +23,22 @@ const PostStatus = () => {
   const listener: PostStatusView = {
     displayInfoMessage: displayInfoMessage,
     clearLastInfoMessage: clearLastInfoMessage,
-    setPost: setPost,
+    setPost: (value: string) => setPost(value),
     displayErrorMessage: displayErrorMessage,
   };
 
-  const presenter = new PostStatusPresenter(listener);
+  const [presenter] = useState(
+    props.presenter ?? props.presenterGenerator(listener)
+  );
 
   const submitPost = async (event: React.MouseEvent) => {
     event.preventDefault();
     presenter.submitPost(post, currentUser!, authToken!);
   };
 
-  // const postStatus = async (
-  //   authToken: AuthToken,
-  //   newStatus: Status
-  // ): Promise<void> => {
-  //   // Pause so we can see the logging out message. Remove when connected to the server
-  //   await new Promise((f) => setTimeout(f, 2000));
-
-  //   // TODO: Call the server to post the status
-  // };
-
   const clearPost = (event: React.MouseEvent) => {
     event.preventDefault();
-    presenter.clearPost();
+    setPost("");
   };
 
   const checkButtonStatus: () => boolean = () => {
@@ -54,6 +51,7 @@ const PostStatus = () => {
         <textarea
           className="form-control"
           id="postStatusTextArea"
+          aria-label="postText"
           rows={10}
           placeholder="What's on your mind?"
           value={post}
@@ -65,6 +63,7 @@ const PostStatus = () => {
       <div className="form-group">
         <button
           id="postStatusButton"
+          aria-label="post"
           className="btn btn-md btn-primary me-1"
           type="button"
           disabled={checkButtonStatus()}
@@ -74,6 +73,7 @@ const PostStatus = () => {
         </button>
         <button
           id="clearStatusButton"
+          aria-label="clear"
           className="btn btn-md btn-secondary"
           type="button"
           disabled={checkButtonStatus()}
